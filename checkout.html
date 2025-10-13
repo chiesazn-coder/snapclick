@@ -76,8 +76,12 @@
         <!-- ========== RIGHT: DETAILS ========== -->
         <div class="lg:pl-6">
             <!-- Title -->
-            <h1 class="text-3xl md:text-4xl font-bold text-neutral-900">Robotic Hand Massager Alpine Green</h1>
-    
+            <h1 id="pd-title"
+              data-base="Robotic Hand Massager"
+              class="text-3xl md:text-4xl font-bold text-neutral-900">
+              Robotic Hand Massager Alpine Green
+            </h1>
+
             <!-- Rating + count -->
             <div class="mt-2 flex items-center gap-2 text-sm text-neutral-600">
             <div class="flex items-center text-amber-500">
@@ -170,9 +174,9 @@
     
             <!-- CTA -->
             <div class="mt-5">
-            <button class="w-full rounded-lg bg-emerald-700 text-white font-semibold py-4 text-lg hover:bg-emerald-800 shadow-sm">
+              <button id="buy-btn" class="w-full rounded-lg bg-emerald-700 text-white font-semibold py-4 text-lg hover:bg-emerald-800 shadow-sm">
                 ADD TO CART
-            </button>
+              </button>
             </div>
 
             <!-- Quantity & Subtotal -->
@@ -274,6 +278,7 @@
     </svg>
 
     <script type="module">
+      const titleEl = document.getElementById('pd-title');
       // ====== Data gambar per warna (pakai path milikmu) ======
       const productImages = {
         green: [
@@ -315,22 +320,29 @@
       function setColor(color) {
         const images = productImages[color];
         if (!images || !images.length) return;
-        // ganti gambar utama
+
+        // ganti gambar utama + thumbnails
         mainImg.src = images[0];
-        // rebuild thumbnails
         renderThumbnails(images);
+
         // set state aktif di swatch
         colorSwatches.forEach(sw => {
           const active = sw.dataset.color === color;
           sw.dataset.active = active ? 'true' : 'false';
-          // opsional: atur border agar swatch aktif terlihat
-          if (active) {
-            sw.classList.add('border-emerald-700');
-          } else {
-            sw.classList.remove('border-emerald-700');
-          }
+          if (active) sw.classList.add('border-emerald-700');
+          else sw.classList.remove('border-emerald-700');
         });
+
+        // === GANTI NAMA PRODUK BERDASARKAN WARNA ===
+        const activeSwatch = Array.from(colorSwatches).find(sw => sw.dataset.color === color);
+        const colorLabel = activeSwatch?.getAttribute('aria-label') || color;   // mis. "Alpine Green", "Rose Pink"
+        const baseName = titleEl.dataset.base || 'Product';
+        titleEl.textContent = `${baseName} ${colorLabel}`;
+
+        // (opsional) update alt gambar utama
+        mainImg.alt = `${baseName} ${colorLabel}`;
       }
+
     
       // ====== Event: klik swatch warna ======
       colorSwatches.forEach(sw => {
@@ -407,7 +419,46 @@
       const defaultBundle = Array.from(bundleRadios).find(r => r.checked);
       defaultBundle ? applyBundle(defaultBundle) : updateSubtotalFromQty();
 
+      // ===== Shopify Redirect (direct-to-cart by variant) =====
+      const SHOPIFY_STORE = 'snapclickclick.myshopify.com'; // ganti jika perlu
+      const VARIANT_BY_COLOR = {
+        green: '51550698242342',      // Variant ID GREEN (dari URL yang kamu kirim)
+        pink:  '51550698275110' // <-- ganti dengan Variant ID PINK-mu
+      };
+
+      const buyBtn = document.getElementById('buy-btn');
+
+      function getActiveColor() {
+        const active = Array.from(colorSwatches).find(sw => sw.dataset.active === 'true') || colorSwatches[0];
+        return active?.dataset.color || 'green';
+      }
+
+      function buildCartUrl(variantId, qty, opts = {}) {
+        const base = `https://${SHOPIFY_STORE}/cart/${variantId}:${qty}`;
+        const params = new URLSearchParams();
+        if (opts.discount) params.set('discount', opts.discount);          // opsional: kode diskon
+        if (opts.note)     params.set('note', opts.note);                  // opsional: catatan order
+        return params.toString() ? `${base}?${params.toString()}` : base;
+      }
+
+      buyBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = getActiveColor();
+        const variantId = VARIANT_BY_COLOR[color];
+        const qty = clamp(Number(qtyInput.value || 1), 1, 99);
+
+        if (!variantId) {
+          alert(`Variant ID Shopify belum diset untuk warna: ${color}`);
+          return;
+        }
+
+        // contoh kalau mau auto-apply diskon: tambahkan { discount: 'FLASH39' }
+        const url = buildCartUrl(variantId, qty /*, { discount: 'FLASH39' }*/);
+        window.location.href = url; // → langsung masuk cart Shopify & siap checkout
+      });
     </script>
+
+    
     
     <!-- (opsional) Section berikutnya -->
     <main id="shop" class="mx-auto max-w-7xl px-4 py-12">
