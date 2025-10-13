@@ -69,24 +69,8 @@
             </div>
     
             <!-- Thumbnails -->
-            <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
-            <button class="group shrink-0 rounded-xl ring-1 ring-black/10 p-1 focus:outline-none"
-                    data-src="/src/images/products/prod-1.png">
-                <img src="/src/images/products/prod-1.png" class="h-20 w-20 object-cover rounded-lg" alt="">
-            </button>
-            <button class="group shrink-0 rounded-xl ring-1 ring-black/10 p-1"
-                    data-src="/src/images/products/prod-2.png">
-                <img src="/src/images/products/prod-2.png" class="h-20 w-20 object-cover rounded-lg" alt="">
-            </button>
-            <button class="group shrink-0 rounded-xl ring-1 ring-black/10 p-1"
-                    data-src="/src/images/products/prod-3.png">
-                <img src="/src/images/products/prod-3.png" class="h-20 w-20 object-cover rounded-lg" alt="">
-            </button>
-            <button class="group shrink-0 rounded-xl ring-1 ring-black/10 p-1"
-                    data-src="/src/images/products/prod-4.png">
-                <img src="/src/images/products/prod-4.png" class="h-20 w-20 object-cover rounded-lg" alt="">
-            </button>
-            </div>
+            <div id="pd-thumbs" class="mt-4 flex gap-3 overflow-x-auto pb-1"></div>
+
         </div>
     
         <!-- ========== RIGHT: DETAILS ========== -->
@@ -109,8 +93,13 @@
     
             <!-- Price row -->
             <div class="mt-3 flex items-center flex-wrap gap-3">
-            <div class="text-2xl md:text-3xl font-extrabold text-emerald-700">$110</div>
+              <div id="unit-price"
+                  class="text-2xl md:text-3xl font-extrabold text-emerald-700"
+                  data-price="110" data-currency="$">
+                $110
+              </div>
             </div>
+
     
             <!-- Bullets -->
             <ul class="mt-5 space-y-2 text-sm text-neutral-800">
@@ -132,37 +121,47 @@
             </li>
             </ul>
     
-            <!-- Options -->
+            <!-- Color selector -->
             <div class="mt-6">
-            <div class="text-sm text-neutral-600 mb-2">Option - Basic</div>
-            <div class="flex flex-wrap gap-2">
-                <button class="rounded-full px-4 py-1.5 text-sm font-medium bg-neutral-900 text-white">Basic</button>
-                <button class="rounded-full px-4 py-1.5 text-sm font-medium border hover:bg-neutral-50">Standard</button>
-                <button class="rounded-full px-4 py-1.5 text-sm font-medium border hover:bg-neutral-50">Premium</button>
+              <div class="text-sm text-neutral-600 mb-2">Color</div>
+              <div id="pd-colors" class="flex flex-wrap items-center gap-2">
+                <!-- tombol warna (swatch) -->
+                <button type="button" class="w-8 h-8 rounded-full border-2 border-emerald-700 bg-emerald-600 data-[active=true]:ring-2 data-[active=true]:ring-emerald-400" aria-label="Alpine Green" data-color="green" data-active="true"></button>
+                <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent bg-pink-400 data-[active=true]:ring-2 data-[active=true]:ring-neutral-400" aria-label="Rose Pink" data-color="pink"></button>
+                <!-- contoh varian tambahan:
+                <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent bg-white data-[active=true]:ring-2 data-[active=true]:ring-neutral-300" aria-label="Pearl White" data-color="white"></button>
+                -->
+              </div>
             </div>
-            </div>
-    
-            <!-- Bundle & Save -->
+
+            <!-- BUNDLE & SAVE -->
             <div class="mt-6">
-            <div class="text-xs tracking-wide text-neutral-500 mb-2">BUNDLE &amp; SAVE</div>
-            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="text-xs tracking-wide text-neutral-500 mb-2">BUNDLE &amp; SAVE</div>
+              <div class="grid gap-3 sm:grid-cols-2">
                 <label class="flex items-start gap-3 rounded-xl border p-4 hover:border-emerald-500 cursor-pointer">
-                <input type="radio" name="bundle" class="mt-1 h-4 w-4 accent-emerald-600" checked />
-                <div class="flex-1">
+                  <input type="radio" name="bundle" class="mt-1 h-4 w-4 accent-emerald-600"
+                        data-qty="1" data-total="110" checked />
+                  <div class="flex-1">
                     <div class="font-semibold">Buy 1</div>
-                    <div class="text-sm text-neutral-600">Rp 2.536.000 <span class="line-through text-neutral-400">Rp 4.227.000</span></div>
-                </div>
+                    <div class="text-sm text-neutral-600">
+                      $110 <span class="line-through text-neutral-400">$130</span>
+                    </div>
+                  </div>
                 </label>
+
                 <label class="flex items-start gap-3 rounded-xl border p-4 hover:border-emerald-500 cursor-pointer">
-                <input type="radio" name="bundle" class="mt-1 h-4 w-4 accent-emerald-600" />
-                <div class="flex-1">
+                  <input type="radio" name="bundle" class="mt-1 h-4 w-4 accent-emerald-600"
+                        data-qty="2" data-total="187" />
+                  <div class="flex-1">
                     <div class="font-semibold">Buy 2</div>
-                    <div class="text-sm text-neutral-600">Rp 5.072.000 <span class="line-through text-neutral-400">Rp 8.454.000</span></div>
-                </div>
+                    <div class="text-sm text-neutral-600">
+                      $187 <span class="line-through text-neutral-400">$220</span>
+                    </div>
+                  </div>
                 </label>
+              </div>
             </div>
-            </div>
-    
+
             <!-- Countdown -->
             <div class="mt-4 flex items-center gap-2 text-sm">
             <svg class="h-4 w-4 text-rose-600"><use href="#icon-clock"/></svg>
@@ -175,7 +174,30 @@
                 ADD TO CART
             </button>
             </div>
-    
+
+            <!-- Quantity & Subtotal -->
+            <div class="mt-5 flex items-center justify-between">
+              <!-- Quantity control -->
+              <div class="flex items-center gap-2">
+                <button type="button"
+                        id="qty-dec"
+                        class="h-9 w-9 rounded-md border hover:bg-neutral-50 flex items-center justify-center"
+                        aria-label="Decrease quantity">−</button>
+                <input id="qty-input" type="number" inputmode="numeric" min="1" max="99" value="1"
+                      class="w-14 h-9 rounded-md border text-center" aria-label="Quantity">
+                <button type="button"
+                        id="qty-inc"
+                        class="h-9 w-9 rounded-md border hover:bg-neutral-50 flex items-center justify-center"
+                        aria-label="Increase quantity">+</button>
+              </div>
+
+              <!-- Subtotal -->
+              <div class="text-right">
+                <div class="text-xs text-neutral-500">Subtotal</div>
+                <div id="subtotal" class="text-lg font-semibold text-neutral-900">$110</div>
+              </div>
+            </div>
+
             <!-- Mini testimonial
             <div class="mt-5 flex items-start gap-3">
             <img src="/src/images/avatar-lucy.jpg" class="h-10 w-10 rounded-full object-cover" alt="Lucy">
@@ -250,18 +272,143 @@
         <path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 11h5v-2h-4V7h-2v6Z"/>
         </symbol>
     </svg>
-    
+
     <script type="module">
-        // Thumbnail -> main image swap
-        document.querySelectorAll('[data-src]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const main = document.getElementById('pd-main');
-            main.src = btn.getAttribute('data-src');
+      // ====== Data gambar per warna (pakai path milikmu) ======
+      const productImages = {
+        green: [
+          '/src/images/products/green/1.png',
+          '/src/images/products/green/2.png',
+          '/src/images/products/green/3.png',
+          '/src/images/products/green/4.png',
+        ],
+        pink: [
+          '/src/images/products/pink/1.png',
+          '/src/images/products/pink/2.png',
+          '/src/images/products/pink/3.png',
+          '/src/images/products/pink/4.png',
+        ],
+        // white: [ ... ],
+      };
+    
+      // ====== Elemen yang dipakai ======
+      const mainImg = document.getElementById('pd-main');
+      const thumbs = document.getElementById('pd-thumbs');
+      const colorSwatches = document.querySelectorAll('#pd-colors [data-color]');
+    
+      // ====== Render ulang thumbnails sesuai warna ======
+      function renderThumbnails(list) {
+        thumbs.innerHTML = '';
+        list.forEach((src) => {
+          const btn = document.createElement('button');
+          btn.className = 'group shrink-0 rounded-xl ring-1 ring-black/10 p-1 focus:outline-none';
+          btn.setAttribute('data-src', src);
+          btn.innerHTML = `<img src="${src}" class="h-20 w-20 object-cover rounded-lg" alt="">`;
+          btn.addEventListener('click', () => {
+            mainImg.src = src;
+          });
+          thumbs.appendChild(btn);
         });
+      }
+    
+      // ====== Ganti varian warna ======
+      function setColor(color) {
+        const images = productImages[color];
+        if (!images || !images.length) return;
+        // ganti gambar utama
+        mainImg.src = images[0];
+        // rebuild thumbnails
+        renderThumbnails(images);
+        // set state aktif di swatch
+        colorSwatches.forEach(sw => {
+          const active = sw.dataset.color === color;
+          sw.dataset.active = active ? 'true' : 'false';
+          // opsional: atur border agar swatch aktif terlihat
+          if (active) {
+            sw.classList.add('border-emerald-700');
+          } else {
+            sw.classList.remove('border-emerald-700');
+          }
         });
+      }
+    
+      // ====== Event: klik swatch warna ======
+      colorSwatches.forEach(sw => {
+        sw.addEventListener('click', () => setColor(sw.dataset.color));
+      });
+    
+      // ====== Inisialisasi ======
+      // cari swatch yang bertanda data-active="true", kalau tidak ada pakai warna pertama
+      const defaultSwatch = Array.from(colorSwatches).find(sw => sw.dataset.active === 'true') || colorSwatches[0];
+      setColor(defaultSwatch?.dataset.color || 'green');
+    
+      // ====== (Opsional) Tetap dukung klik thumbnail statis bila ada atribut data-src lain di DOM ======
+      // (Tidak wajib, karena kita rebuild thumbnails sendiri)
+
+      // ===== Quantity, Subtotal & Bundle Sync =====
+      const unitEl = document.getElementById('unit-price');
+      const qtyInput = document.getElementById('qty-input');
+      const incBtn = document.getElementById('qty-inc');
+      const decBtn = document.getElementById('qty-dec');
+      const subtotalEl = document.getElementById('subtotal');
+      const bundleRadios = document.querySelectorAll('input[name="bundle"]');
+
+      const currency = unitEl?.dataset.currency || '$';
+      const unit = Number(unitEl?.dataset.price || 0);
+
+      function fmt(n) {
+        const s = Number(n).toFixed(2);
+        return s.endsWith('.00') ? String(Math.round(Number(n))) : s;
+      }
+      function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+      function clearBundleSelection() {
+        bundleRadios.forEach(r => (r.checked = false));
+      }
+
+      function updateSubtotalFromQty() {
+        const qty = clamp(Number(qtyInput.value || 1), 1, 99);
+        qtyInput.value = qty;
+        subtotalEl.textContent = `${currency}${fmt(unit * qty)}`;
+      }
+
+      function applyBundle(radio) {
+        const qty = Number(radio.dataset.qty || 1);
+        const total = Number(radio.dataset.total || unit);
+        qtyInput.value = clamp(qty, 1, 99);
+        subtotalEl.textContent = `${currency}${fmt(total)}`;
+      }
+
+      // events: +/- quantity
+      incBtn?.addEventListener('click', () => {
+        qtyInput.value = clamp(Number(qtyInput.value || 1) + 1, 1, 99);
+        clearBundleSelection();
+        updateSubtotalFromQty();
+      });
+      decBtn?.addEventListener('click', () => {
+        qtyInput.value = clamp(Number(qtyInput.value || 1) - 1, 1, 99);
+        clearBundleSelection();
+        updateSubtotalFromQty();
+      });
+      qtyInput?.addEventListener('input', () => {
+        clearBundleSelection();
+        updateSubtotalFromQty();
+      });
+      qtyInput?.addEventListener('blur', updateSubtotalFromQty);
+
+      // events: bundle radio
+      bundleRadios.forEach(r => {
+        r.addEventListener('change', () => {
+          if (r.checked) applyBundle(r);
+        });
+      });
+
+      // init: jika ada bundle ter-check → pakai bundle, kalau tidak → qty x unit
+      const defaultBundle = Array.from(bundleRadios).find(r => r.checked);
+      defaultBundle ? applyBundle(defaultBundle) : updateSubtotalFromQty();
+
     </script>
     
-
     <!-- (opsional) Section berikutnya -->
     <main id="shop" class="mx-auto max-w-7xl px-4 py-12">
       <!-- taruh grid produkmu di sini -->
