@@ -9,7 +9,7 @@
 
   <body class="min-h-screen bg-neutral-50 text-neutral-900">
     <!-- Announcement bar -->
-    <div class="w-full bg-neutral-900 text-neutral-100 text-center text-sm tracking-wide py-2">
+    <div class="w-full bg-neutral-900 text-neutral-100 text-center text -sm tracking-wide py-2">
       <span class="inline-flex items-center gap-2">
         <!-- mini store icon -->
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -278,8 +278,20 @@
     </svg>
 
     <script type="module">
+      // ====== ELEMEN & STATE PRODUK PDP ======
       const titleEl = document.getElementById('pd-title');
-      // ====== Data gambar per warna (pakai path milikmu) ======
+      const mainImg = document.getElementById('pd-main');
+      const thumbs = document.getElementById('pd-thumbs');
+      const colorSwatches = document.querySelectorAll('#pd-colors [data-color]');
+      const unitEl = document.getElementById('unit-price');
+      const qtyInput = document.getElementById('qty-input');
+      const incBtn = document.getElementById('qty-inc');
+      const decBtn = document.getElementById('qty-dec');
+      const subtotalEl = document.getElementById('subtotal');
+      const bundleRadios = document.querySelectorAll('input[name="bundle"]');
+      const buyBtn = document.getElementById('buy-btn');
+    
+      // data gambar untuk tiap warna
       const productImages = {
         green: [
           '/src/images/products/green/1.png',
@@ -293,15 +305,19 @@
           '/src/images/products/pink/3.png',
           '/src/images/products/pink/4.png',
         ],
-        // white: [ ... ],
+        // white: [...]
       };
     
-      // ====== Elemen yang dipakai ======
-      const mainImg = document.getElementById('pd-main');
-      const thumbs = document.getElementById('pd-thumbs');
-      const colorSwatches = document.querySelectorAll('#pd-colors [data-color]');
+      // helper kecil
+      function clamp(val, min, max) {
+        return Math.max(min, Math.min(max, val));
+      }
+      function fmt(n) {
+        const s = Number(n).toFixed(2);
+        return s.endsWith('.00') ? String(Math.round(Number(n))) : s;
+      }
     
-      // ====== Render ulang thumbnails sesuai warna ======
+      // ====== Thumbnail renderer ======
       function renderThumbnails(list) {
         thumbs.innerHTML = '';
         list.forEach((src) => {
@@ -316,82 +332,67 @@
         });
       }
     
-      // ====== Ganti varian warna ======
+      // ====== Warna aktif & update UI warna ======
       function setColor(color) {
         const images = productImages[color];
         if (!images || !images.length) return;
-
+    
         // ganti gambar utama + thumbnails
         mainImg.src = images[0];
         renderThumbnails(images);
-
-        // set state aktif di swatch
+    
+        // visual "active" di swatch
         colorSwatches.forEach(sw => {
           const active = sw.dataset.color === color;
           sw.dataset.active = active ? 'true' : 'false';
-          if (active) sw.classList.add('border-emerald-700');
-          else sw.classList.remove('border-emerald-700');
+          if (active) {
+            sw.classList.add('border-emerald-700');
+          } else {
+            sw.classList.remove('border-emerald-700');
+          }
         });
-
-        // === GANTI NAMA PRODUK BERDASARKAN WARNA ===
+    
+        // ganti nama produk (title)
         const activeSwatch = Array.from(colorSwatches).find(sw => sw.dataset.color === color);
-        const colorLabel = activeSwatch?.getAttribute('aria-label') || color;   // mis. "Alpine Green", "Rose Pink"
+        const colorLabel = activeSwatch?.getAttribute('aria-label') || color;
         const baseName = titleEl.dataset.base || 'Product';
         titleEl.textContent = `${baseName} ${colorLabel}`;
-
-        // (opsional) update alt gambar utama
+    
+        // alt img
         mainImg.alt = `${baseName} ${colorLabel}`;
       }
-
     
-      // ====== Event: klik swatch warna ======
+      // klik swatch warna
       colorSwatches.forEach(sw => {
         sw.addEventListener('click', () => setColor(sw.dataset.color));
       });
     
-      // ====== Inisialisasi ======
-      // cari swatch yang bertanda data-active="true", kalau tidak ada pakai warna pertama
+      // init warna default
       const defaultSwatch = Array.from(colorSwatches).find(sw => sw.dataset.active === 'true') || colorSwatches[0];
       setColor(defaultSwatch?.dataset.color || 'green');
     
-      // ====== (Opsional) Tetap dukung klik thumbnail statis bila ada atribut data-src lain di DOM ======
-      // (Tidak wajib, karena kita rebuild thumbnails sendiri)
-
-      // ===== Quantity, Subtotal & Bundle Sync =====
-      const unitEl = document.getElementById('unit-price');
-      const qtyInput = document.getElementById('qty-input');
-      const incBtn = document.getElementById('qty-inc');
-      const decBtn = document.getElementById('qty-dec');
-      const subtotalEl = document.getElementById('subtotal');
-      const bundleRadios = document.querySelectorAll('input[name="bundle"]');
-
+      // ====== Harga, Qty, Bundle sync ======
       const currency = unitEl?.dataset.currency || '$';
       const unit = Number(unitEl?.dataset.price || 0);
-
-      function fmt(n) {
-        const s = Number(n).toFixed(2);
-        return s.endsWith('.00') ? String(Math.round(Number(n))) : s;
-      }
-      function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
-
+    
       function clearBundleSelection() {
         bundleRadios.forEach(r => (r.checked = false));
       }
-
+    
       function updateSubtotalFromQty() {
         const qty = clamp(Number(qtyInput.value || 1), 1, 99);
         qtyInput.value = qty;
         subtotalEl.textContent = `${currency}${fmt(unit * qty)}`;
       }
-
+    
       function applyBundle(radio) {
         const qty = Number(radio.dataset.qty || 1);
         const total = Number(radio.dataset.total || unit);
         qtyInput.value = clamp(qty, 1, 99);
         subtotalEl.textContent = `${currency}${fmt(total)}`;
       }
-
-      // events: +/- quantity
+    
+      // tombol + / -
       incBtn?.addEventListener('click', () => {
         qtyInput.value = clamp(Number(qtyInput.value || 1) + 1, 1, 99);
         clearBundleSelection();
@@ -407,64 +408,311 @@
         updateSubtotalFromQty();
       });
       qtyInput?.addEventListener('blur', updateSubtotalFromQty);
-
-      // events: bundle radio
+    
+      // pilih bundle
       bundleRadios.forEach(r => {
         r.addEventListener('change', () => {
           if (r.checked) applyBundle(r);
         });
       });
-
-      // init: jika ada bundle ter-check → pakai bundle, kalau tidak → qty x unit
+    
+      // init subtotal
       const defaultBundle = Array.from(bundleRadios).find(r => r.checked);
       defaultBundle ? applyBundle(defaultBundle) : updateSubtotalFromQty();
-
-      // ===== Shopify Redirect (direct-to-cart by variant) =====
-      const SHOPIFY_STORE = 'snapclickclick.myshopify.com'; // ganti jika perlu
-      const VARIANT_BY_COLOR = {
-        green: '51550698242342',      // Variant ID GREEN (dari URL yang kamu kirim)
-        pink:  '51550698275110' // <-- ganti dengan Variant ID PINK-mu
-      };
-
-      const buyBtn = document.getElementById('buy-btn');
-
+    
+      // helper untuk ambil warna aktif sekarang
       function getActiveColor() {
         const active = Array.from(colorSwatches).find(sw => sw.dataset.active === 'true') || colorSwatches[0];
         return active?.dataset.color || 'green';
       }
-
-      function buildCartUrl(variantId, qty, opts = {}) {
-        const base = `https://${SHOPIFY_STORE}/cart/${variantId}:${qty}`;
-        const params = new URLSearchParams();
-        if (opts.discount) params.set('discount', opts.discount);          // opsional: kode diskon
-        if (opts.note)     params.set('note', opts.note);                  // opsional: catatan order
-        return params.toString() ? `${base}?${params.toString()}` : base;
+      function getActiveColorLabel() {
+        const active = Array.from(colorSwatches).find(sw => sw.dataset.active === 'true') || colorSwatches[0];
+        return active?.getAttribute('aria-label') || getActiveColor();
       }
-
-      buyBtn?.addEventListener('click', (e) => {
-        e.preventDefault();
+      function getUnitPriceNumber() {
+        return Number(unitEl?.dataset.price || 0);
+      }
+      function getEffectiveQtyAndTotal() {
+        const defaultBundle = Array.from(bundleRadios).find(r => r.checked);
+        if (defaultBundle) {
+          return {
+            qty: Number(defaultBundle.dataset.qty || '1'),
+            total: Number(defaultBundle.dataset.total || getUnitPriceNumber()),
+            isBundle: true,
+          };
+        } else {
+          const q = clamp(Number(qtyInput.value || 1), 1, 99);
+          return {
+            qty: q,
+            total: getUnitPriceNumber() * q,
+            isBundle: false,
+          };
+        }
+      }
+    
+      // ====== CART DRAWER STATE ======
+      const SHOPIFY_STORE = 'snapclickclick.myshopify.com';
+      const VARIANT_BY_COLOR = {
+        green: '51550698242342',
+        pink:  '51550698275110',
+      };
+    
+      let cartItems = []; // { variantId, title, colorLabel, img, unitPrice, qty }
+    
+      // drawer elements
+      const drawer = document.getElementById('cart-drawer');
+      const overlay = document.getElementById('cart-overlay');
+      const openBtn = document.getElementById('cart-open-btn'); // NOTE: di checkout.html belum ada tombol ini di navbar. boleh dikosongin.
+      const closeBtn = document.getElementById('cart-close-btn');
+      const continueBtn = document.getElementById('continue-btn');
+      const cartSubtotalEl = document.getElementById('cart-subtotal');
+      const cartItemsEl = document.getElementById('cart-items');
+      const checkoutBtn = document.getElementById('checkout-btn');
+    
+      function openCart() {
+        drawer.classList.remove('translate-x-full');
+        overlay.classList.remove('pointer-events-none');
+        requestAnimationFrame(() => {
+          overlay.classList.add('opacity-100');
+        });
+      }
+      function closeCart() {
+        drawer.classList.add('translate-x-full');
+        overlay.classList.add('pointer-events-none');
+        overlay.classList.remove('opacity-100');
+      }
+    
+      openBtn?.addEventListener('click', openCart);
+      closeBtn?.addEventListener('click', closeCart);
+      continueBtn?.addEventListener('click', closeCart);
+      overlay?.addEventListener('click', closeCart);
+    
+      function formatMoney(num) {
+        const s = Number(num).toFixed(2);
+        return s.endsWith('.00') ? String(Math.round(Number(num))) : s;
+      }
+    
+      function updateSubtotalUI() {
+        const subtotal = cartItems.reduce((sum, it) => sum + it.unitPrice * it.qty, 0);
+        cartSubtotalEl.textContent = `$${formatMoney(subtotal)}`;
+      }
+    
+      function renderCart() {
+        cartItemsEl.innerHTML = '';
+    
+        cartItems.forEach((item, idx) => {
+          const lineTotal = item.unitPrice * item.qty;
+    
+          const wrapper = document.createElement('div');
+          wrapper.className = 'flex gap-4 border-b pb-6';
+          wrapper.innerHTML = `
+            <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border">
+              <img src="${item.img}"
+                   alt="${item.title} - ${item.colorLabel}"
+                   class="h-full w-full object-cover">
+            </div>
+    
+            <div class="flex flex-1 flex-col justify-between text-sm">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 class="text-sm font-medium text-neutral-900 leading-tight">
+                      ${item.title}
+                    </h3>
+                    <p class="text-xs text-neutral-500 leading-tight">
+                      ${item.colorLabel}
+                    </p>
+                  </div>
+                  <div class="text-sm font-medium text-neutral-900">
+                    $${formatMoney(lineTotal)}
+                  </div>
+                </div>
+              </div>
+    
+              <div class="mt-3 flex items-start justify-between">
+                <div class="flex items-center gap-2">
+                  <button
+                    class="cart-qty-dec h-8 w-8 rounded border flex items-center justify-center text-neutral-700 hover:bg-neutral-50"
+                    aria-label="Decrease quantity"
+                    data-line="${idx}">−</button>
+    
+                  <input
+                    class="cart-qty-input w-12 h-8 rounded border text-center text-sm"
+                    type="number" min="1" max="99" value="${item.qty}"
+                    data-line="${idx}" aria-label="Quantity">
+    
+                  <button
+                    class="cart-qty-inc h-8 w-8 rounded border flex items-center justify-center text-neutral-700 hover:bg-neutral-50"
+                    aria-label="Increase quantity"
+                    data-line="${idx}">+</button>
+                </div>
+    
+                <button
+                  class="text-xs text-neutral-500 hover:text-neutral-800"
+                  data-remove-line="${idx}">
+                  Remove
+                </button>
+              </div>
+            </div>
+          `;
+    
+          cartItemsEl.appendChild(wrapper);
+        });
+    
+        updateSubtotalUI();
+      }
+    
+      // nambah item ke cart dari PDP
+      function addToCartFromPDP() {
         const color = getActiveColor();
+        const colorLabel = getActiveColorLabel();
         const variantId = VARIANT_BY_COLOR[color];
-        const qty = clamp(Number(qtyInput.value || 1), 1, 99);
-
+    
         if (!variantId) {
           alert(`Variant ID Shopify belum diset untuk warna: ${color}`);
           return;
         }
-
-        // contoh kalau mau auto-apply diskon: tambahkan { discount: 'FLASH39' }
-        const url = buildCartUrl(variantId, qty /*, { discount: 'FLASH39' }*/);
-        window.location.href = url; // → langsung masuk cart Shopify & siap checkout
+    
+        const { qty } = getEffectiveQtyAndTotal();
+        const title = titleEl.textContent.trim();
+        const imgSrc = mainImg.src;
+        const unitPrice = getUnitPriceNumber();
+    
+        // jika sudah ada variant itu di cart, tambah qty
+        const existing = cartItems.find(i => i.variantId === variantId);
+        if (existing) {
+          existing.qty = clamp(existing.qty + qty, 1, 99);
+        } else {
+          cartItems.push({
+            variantId,
+            title,
+            colorLabel,
+            img: imgSrc,
+            unitPrice,
+            qty,
+          });
+        }
+    
+        renderCart();
+        openCart();
+      }
+    
+      // klik ADD TO CART
+      buyBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        addToCartFromPDP();
       });
+    
+      // drawer: qty +/-, remove
+      cartItemsEl.addEventListener('click', (e) => {
+        if (e.target.classList.contains('cart-qty-inc')) {
+          const line = Number(e.target.dataset.line);
+          const item = cartItems[line];
+          if (!item) return;
+          item.qty = clamp(item.qty + 1, 1, 99);
+          renderCart();
+        }
+    
+        if (e.target.classList.contains('cart-qty-dec')) {
+          const line = Number(e.target.dataset.line);
+          const item = cartItems[line];
+          if (!item) return;
+          item.qty = clamp(item.qty - 1, 1, 99);
+          renderCart();
+        }
+    
+        if (e.target.matches('[data-remove-line]')) {
+          const line = Number(e.target.getAttribute('data-remove-line'));
+          cartItems.splice(line, 1);
+          renderCart();
+        }
+      });
+    
+      cartItemsEl.addEventListener('input', (e) => {
+        if (e.target.classList.contains('cart-qty-input')) {
+          const line = Number(e.target.dataset.line);
+          const item = cartItems[line];
+          if (!item) return;
+          let v = Number(e.target.value || 1);
+          if (isNaN(v)) v = 1;
+          v = clamp(v, 1, 99);
+          item.qty = v;
+          renderCart();
+        }
+      });
+    
+      // checkout → build URL Shopify /cart/<variant:qty>,<variant:qty>
+      checkoutBtn?.addEventListener('click', () => {
+        if (!cartItems.length) {
+          alert('Your cart is empty.');
+          return;
+        }
+        const parts = cartItems.map(it => `${it.variantId}:${it.qty}`);
+        const cartUrl = `https://${SHOPIFY_STORE}/cart/${parts.join(',')}`;
+        window.location.href = cartUrl;
+      });
+    
+      // initial render (cart kosong)
+      renderCart();
     </script>
-
     
     
     <!-- (opsional) Section berikutnya -->
     <main id="shop" class="mx-auto max-w-7xl px-4 py-12">
       <!-- taruh grid produkmu di sini -->
     </main>
-  
+
+    <!-- BACKDROP -->
+    <div id="cart-overlay"
+    class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200 z-[80]"></div>
+
+    <!-- CART DRAWER -->
+    <aside id="cart-drawer"
+      class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-[90] translate-x-full transition-transform duration-200 flex flex-col">
+
+      <!-- HEADER -->
+      <header class="flex items-center justify-between border-b px-6 py-4">
+      <h2 class="text-lg font-semibold text-neutral-900">Your cart</h2>
+      <button id="cart-close-btn"
+      class="p-2 rounded-md hover:bg-neutral-100 text-neutral-500"
+      aria-label="Close cart">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+      </button>
+      </header>
+
+      <!-- LINE ITEMS -->
+      <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-6 text-sm">
+      <!-- item akan di-render via JS -->
+      </div>
+
+      <!-- FOOTER -->
+      <div class="border-t px-6 py-6">
+        <div class="flex items-center justify-between text-sm">
+        <span class="text-neutral-600">Subtotal</span>
+        <span id="cart-subtotal" class="text-base font-semibold text-neutral-900">
+          $0
+        </span>
+        </div>
+
+        <p class="mt-2 text-xs text-neutral-500 leading-relaxed">
+        Taxes and shipping calculated at checkout.
+        </p>
+
+        <button id="checkout-btn"
+        class="mt-4 w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-3 hover:bg-neutral-800">
+        Check out
+        </button>
+
+        <button id="continue-btn"
+        class="mt-3 w-full text-center text-sm text-neutral-700 underline underline-offset-2 hover:text-neutral-900">
+        Continue shopping
+        </button>
+      </div>
+    </aside>
+
     <footer class="border-t">
       <div class="mx-auto max-w-7xl px-4 py-8 text-sm text-neutral-500">
         © <span id="y"></span> clickclick
@@ -473,6 +721,7 @@
   
     <script type="module" src="/src/main.js"></script>
     <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+    
   </body>
   
 </html>
